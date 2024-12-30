@@ -16,7 +16,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(_: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true }
   }
 
@@ -29,7 +29,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       return (
         <div className="text-center p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           <h2 className="text-2xl font-bold mb-2">Oops, there was an error!</h2>
-          <p>We're sorry, something went wrong. Please try refreshing the page or contact support if the problem persists.</p>
+          <p>We&apos;re sorry, something went wrong. Please try refreshing the page or contact support if the problem persists.</p>
         </div>
       )
     }
