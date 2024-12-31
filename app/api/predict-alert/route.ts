@@ -1,31 +1,27 @@
 import { NextResponse } from 'next/server'
-import { spawn } from 'child_process'
-import { resolve } from 'path'
+import { exec } from 'child_process'
+import { promisify } from 'util'
+import path from 'path'
 
-export async function POST(req: Request) {
-  const body = await req.json()
-  const { features } = body
+const execPromise = promisify(exec)
 
-  return new Promise((resolve) => {
-    const process = spawn('python', [
-      resolve('./app/utils/prediction_utils.py'),
-      'predict_alert',
-      JSON.stringify(features),
-    ])
+export async function POST(req: Request): Promise<NextResponse> {
+  try {
+    const body = await req.json()
+    const { features } = body
 
-    let result = ''
+    const scriptPath = path.resolve(process.cwd(), 'app/utils/prediction_utils.py')
+    const { stdout, stderr } = await execPromise(`python ${scriptPath} predict_alert '${JSON.stringify(features)}'`)
 
-    process.stdout.on('data', (data) => {
-      result += data.toString()
-    })
+    if (stderr) {
+      console.error('Python script error:', stderr)
+      return NextResponse.json({ error: 'Prediction failed' }, { status: 500 })
+    }
 
-    process.on('close', (code) => {
-      if (code !== 0) {
-        resolve(NextResponse.json({ error: 'Prediction failed' }, { status: 500 }))
-      } else {
-        resolve(NextResponse.json({ prediction: result.trim() }))
-      }
-    })
-  })
+    return NextResponse.json({ prediction: stdout.trim() })
+  } catch (error) {
+    console.error('Error in predict-alert route:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
