@@ -13,22 +13,6 @@ const inter = Inter({
 export const metadata = {
   title: 'Earthquake and Tsunami Prediction',
   description: 'Predictive analysis for seismic activity and tsunami risks',
-  keywords: 'earthquake, tsunami, prediction, seismic activity, risk assessment',
-  openGraph: {
-    title: 'Earthquake and Tsunami Prediction',
-    description: 'Predictive analysis for seismic activity and tsunami risks',
-    url: 'https://earthquake-tsunami-prediction.vercel.app',
-    siteName: 'Earthquake and Tsunami Prediction',
-    images: [
-      {
-        url: 'https://earthquake-tsunami-prediction.vercel.app/og-image.jpg',
-        width: 1200,
-        height: 630,
-      },
-    ],
-    locale: 'en-US',
-    type: 'website',
-  },
 }
 
 export default function RootLayout({
