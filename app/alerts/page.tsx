@@ -5,10 +5,15 @@ import { useState } from 'react'
 export default function AlertPrediction() {
   const [prediction, setPrediction] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [logs, setLogs] = useState<string | null>(null)
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoading(true)
+    setError(null)
+    setPrediction(null)
+    setLogs(null)
 
     const formData = new FormData(event.currentTarget)
     const features = [
@@ -19,6 +24,7 @@ export default function AlertPrediction() {
     ]
 
     try {
+      console.log('Sending request with features:', features)
       const response = await fetch('/api/predict-alert', {
         method: 'POST',
         headers: {
@@ -27,17 +33,34 @@ export default function AlertPrediction() {
         body: JSON.stringify({ features }),
       })
 
+      console.log('Response status:', response.status)
+      const data = await response.json()
+      console.log('Response data:', data)
+
       if (!response.ok) {
-        throw new Error('Prediction failed')
+        throw new Error(data.error || `HTTP error! status: ${response.status}`)
       }
 
-      const data = await response.json()
       setPrediction(data.prediction)
+      setLogs(data.logs)
     } catch (error) {
-      console.error('Error:', error)
-      setPrediction('Error occurred during prediction')
+      console.error('Error in handleSubmit:', error)
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const getAlertLevel = (prediction: string) => {
+    switch (prediction) {
+      case '0':
+        return 'Low'
+      case '1':
+        return 'Medium'
+      case '2':
+        return 'High'
+      default:
+        return 'Unknown'
     }
   }
 
@@ -65,10 +88,22 @@ export default function AlertPrediction() {
           {loading ? 'Predicting...' : 'Predict Alert'}
         </button>
       </form>
+      {error && (
+        <div className="mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          <h2 className="text-xl font-semibold mb-2">Error:</h2>
+          <p>{error}</p>
+        </div>
+      )}
       {prediction && (
         <div className="mt-6 p-4 bg-gray-100 rounded">
           <h2 className="text-xl font-semibold mb-2">Prediction Result:</h2>
-          <p>{prediction}</p>
+          <p>Alert Level: {getAlertLevel(prediction)}</p>
+        </div>
+      )}
+      {logs && (
+        <div className="mt-6 p-4 bg-gray-100 rounded">
+          <h2 className="text-xl font-semibold mb-2">Prediction Logs:</h2>
+          <pre className="whitespace-pre-wrap">{logs}</pre>
         </div>
       )}
     </div>

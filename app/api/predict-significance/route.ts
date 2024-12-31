@@ -11,7 +11,8 @@ export async function POST(req: Request): Promise<NextResponse> {
     const { features } = body
 
     const scriptPath = path.resolve(process.cwd(), 'app/utils/prediction_utils.py')
-    const { stdout, stderr } = await execPromise(`python ${scriptPath} predict_significance '${JSON.stringify(features)}'`)
+    const { stdout, stderr } = await execPromise(`python "${scriptPath}" predict_significance '${JSON.stringify(features)}'`);
+
 
     if (stderr) {
       console.error('Python script error:', stderr)
